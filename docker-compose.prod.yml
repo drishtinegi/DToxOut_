@@ -1,0 +1,25 @@
+# Production overlay: adds automatic HTTPS (Caddy + Let's Encrypt) in front of the stack.
+#   docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build
+# Requires DOMAIN in .env (DNS A record must point to this server) and ports 80/443 open.
+services:
+  backend:
+    environment:
+      HSTS_MAX_AGE: "31536000"
+      CORS_ORIGINS: https://${DOMAIN:?set DOMAIN in .env}
+  frontend:
+    ports: !reset []
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      DOMAIN: ${DOMAIN}
+    command: caddy reverse-proxy --from ${DOMAIN} --to frontend:80
+    volumes:
+      - caddy_data:/data
+    depends_on:
+      - frontend
+volumes:
+  caddy_data:

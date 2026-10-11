@@ -1,0 +1,5 @@
+inciName,country,jurisdiction,regulatoryStatus,restrictionDetails,productCategory,concentrationLimit,effectiveDate,verificationStatus
+METHYLPARABEN,US,US,RESTRICTED,FDA OTC Tentative Final Monograph limits,Cosmetics,0.4%,2023-01-01,PENDING_REVIEW
+SALICYLIC ACID,US,US,RESTRICTED,FDA OTC Acne Drug Monograph maximum 2.0%,Acne Treatment,2.0%,2022-05-10,PENDING_REVIEW
+TITANIUM DIOXIDE,US,US,APPROVED,FDA OTC Sunscreen Monograph up to 25.0%,Sunscreen,25.0%,2021-08-01,PENDING_REVIEW
+UNMATCHED_TEST_CHEMICAL_ABC,US,US,RESTRICTED,Pending evaluation,Cosmetics,1.0%,2024-01-01,UNVERIFIED

@@ -1,0 +1,17 @@
+# Runtime dependencies for DToxOut API
+fastapi>=0.110,<1.0
+uvicorn[standard]>=0.29,<1.0
+gunicorn>=22.0,<24.0
+python-dotenv>=1.0,<2.0
+pydantic>=2.6,<3.0
+pydantic-settings>=2.2,<3.0
+prisma>=0.13,<0.16
+python-jose[cryptography]>=3.3,<4.0
+passlib[bcrypt]>=1.7.4,<2.0
+bcrypt==4.0.1
+python-multipart>=0.0.9
+slowapi>=0.1.9,<1.0
+
+# Image handling + OCR (imported by upload/ocr services)
+Pillow>=10.3,<12.0
+pytesseract>=0.3.10,<1.0

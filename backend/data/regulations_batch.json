@@ -1,0 +1,68 @@
+{
+  "manifest": {
+    "sourceOrganization": "European Commission / Official Journal of the EU",
+    "sourceUrl": "https://ec.europa.eu/growth/tools-databases/cosing/",
+    "retrievedDate": "2026-09-01T00:00:00Z",
+    "defaultSourceType": "REGULATORY_LIST",
+    "defaultVerificationStatus": "PENDING_REVIEW",
+    "licenseNote": "Public domain regulatory database fixture data for DToxOut testing."
+  },
+  "data": [
+    {
+      "inciName": "METHYLPARABEN",
+      "country": "EU",
+      "jurisdiction": "EU",
+      "regulatoryStatus": "RESTRICTED",
+      "restrictionDetails": "Maximum concentration 0.4% (as acid) for single ester, 0.8% for mixtures of esters.",
+      "productCategory": "Cosmetic Products",
+      "concentrationLimit": "0.4%",
+      "effectiveDate": "2024-01-01",
+      "sourceDocumentId": "EU-COS-ANNEX-V-ENTRY-12",
+      "verificationStatus": "PENDING_REVIEW"
+    },
+    {
+      "inciName": "SALICYLIC ACID",
+      "country": "EU",
+      "jurisdiction": "EU",
+      "regulatoryStatus": "RESTRICTED",
+      "restrictionDetails": "Maximum concentration 3.0% for rinse-off hair products, 2.0% for other products. Not to be used in products for children under 3 years.",
+      "productCategory": "Hair and Skin Care",
+      "concentrationLimit": "3.0% / 2.0%",
+      "effectiveDate": "2023-06-15",
+      "sourceDocumentId": "EU-COS-ANNEX-III-ENTRY-98",
+      "verificationStatus": "PENDING_REVIEW"
+    },
+    {
+      "inciName": "TITANIUM DIOXIDE",
+      "country": "EU",
+      "jurisdiction": "EU",
+      "regulatoryStatus": "APPROVED",
+      "restrictionDetails": "Allowed as colorant and UV filter up to 25% except in applications that may lead to exposure of end user lungs by inhalation.",
+      "productCategory": "Suncare and Cosmetics",
+      "concentrationLimit": "25.0%",
+      "effectiveDate": "2022-11-01",
+      "sourceDocumentId": "EU-COS-ANNEX-VI-ENTRY-27",
+      "verificationStatus": "PENDING_REVIEW"
+    },
+    {
+      "inciName": "FORMALDEHYDE",
+      "country": "EU",
+      "jurisdiction": "EU",
+      "regulatoryStatus": "BANNED",
+      "restrictionDetails": "Prohibited in cosmetic products under Annex II entry 1577.",
+      "productCategory": "All Cosmetics",
+      "concentrationLimit": "0.0%",
+      "effectiveDate": "2019-06-12",
+      "sourceDocumentId": "EU-COS-ANNEX-II-ENTRY-1577",
+      "verificationStatus": "PENDING_REVIEW"
+    },
+    {
+      "inciName": "UNMATCHED_TEST_COMPOUND_XYZ",
+      "country": "US",
+      "jurisdiction": "US",
+      "regulatoryStatus": "PENDING_REVIEW",
+      "restrictionDetails": "Under evaluation by safety panel.",
+      "verificationStatus": "UNVERIFIED"
+    }
+  ]
+}

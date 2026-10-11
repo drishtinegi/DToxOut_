@@ -1,0 +1,58 @@
+# Local full-stack run:  docker compose up --build
+# Secrets come from a root-level .env file (see .env.example) - nothing is hard-coded.
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-dtoxuser}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}
+      POSTGRES_DB: ${POSTGRES_DB:-dtoxout}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    # DB is NOT published to the host; only the backend can reach it.
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-dtoxuser} -d ${POSTGRES_DB:-dtoxout}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: ./backend
+    restart: unless-stopped
+    environment:
+      APP_ENV: ${APP_ENV:-production}
+      DEBUG: "false"
+      DATABASE_URL: postgresql://${POSTGRES_USER:-dtoxuser}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-dtoxout}?schema=public
+      JWT_SECRET_KEY: ${JWT_SECRET_KEY:?set JWT_SECRET_KEY (32+ chars) in .env}
+      CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:3000}
+      TRUSTED_PROXY_COUNT: "1"
+      OCR_PROVIDER: ${OCR_PROVIDER:-tesseract}
+      WEB_CONCURRENCY: ${WEB_CONCURRENCY:-2}
+      ENABLE_API_DOCS: ${ENABLE_API_DOCS:-false}
+      HSTS_MAX_AGE: "0"   # plain http locally; enable behind HTTPS
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - upload_data:/app/uploads
+    expose:
+      - "8000"
+
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        VITE_API_URL: /api/v1
+    restart: unless-stopped
+    environment:
+      BACKEND_URL: http://backend:8000
+    ports:
+      - "${FRONTEND_PORT:-3000}:80"
+    depends_on:
+      - backend
+
+volumes:
+  postgres_data:
+  upload_data:

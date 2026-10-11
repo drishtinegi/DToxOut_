@@ -1,0 +1,274 @@
+// DToxOut Prisma Schema
+// Production database schema for the DToxOut application.
+// Run `prisma migrate dev` after modifying this file to apply changes.
+
+generator client {
+  provider = "prisma-client-py"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ---------------------------------------------------------------------------
+// Enums
+// ---------------------------------------------------------------------------
+
+/// Role assigned to a user account.
+enum Role {
+  USER
+  ADMIN
+}
+
+/// Toxicity / risk classification used across ingredients and safety profiles.
+enum RiskLevel {
+  LOW
+  MODERATE
+  HIGH
+  VERY_HIGH
+}
+
+/// Regulatory disposition of an ingredient in a given jurisdiction.
+enum RegulatoryStatus {
+  APPROVED
+  RESTRICTED
+  BANNED
+  PENDING_REVIEW
+}
+
+enum EvidenceLevel {
+  LOW
+  MODERATE
+  HIGH
+  VERY_HIGH
+}
+
+enum SourceType {
+  REGULATORY_LIST
+  SCIENTIFIC_STUDY
+  VENDOR_SPEC
+  COMMUNITY_REPORT
+  INTERNAL_AUDIT
+}
+
+enum VerificationStatus {
+  UNVERIFIED
+  PENDING_REVIEW
+  VERIFIED
+  DEPRECATED
+}
+
+
+
+
+// ---------------------------------------------------------------------------
+// Models
+// ---------------------------------------------------------------------------
+
+/// Registered user of the application.
+model User {
+  id             String   @id @default(uuid()) @db.Uuid
+  email          String   @unique
+  username       String   @unique
+  hashedPassword String
+  role           Role     @default(USER)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  /// A user can perform many scans.
+  scans Scan[]
+
+  @@index([email])
+  @@index([username])
+}
+
+/// A single ingredient-scanning session initiated by a user.
+model Scan {
+  id               String   @id @default(uuid()) @db.Uuid
+  userId           String   @db.Uuid
+  productName      String
+  imageUrl         String?
+  overallRiskScore Float
+  createdAt        DateTime @default(now())
+
+  /// The user who initiated this scan.
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  /// Ingredients detected in this scan.
+  scanIngredients ScanIngredient[]
+
+  @@index([userId])
+  @@index([createdAt])
+}
+
+/// Canonical ingredient entry in the knowledge base.
+model Ingredient {
+  id            String   @id @default(uuid()) @db.Uuid
+  inciName      String   @unique
+  commonName    String?
+  description   String
+  function      String
+  categoryId    String? @db.Uuid
+  category      IngredientCategory? @relation(fields: [categoryId], references: [id])
+  safetyRating  Float
+  evidenceLevel EvidenceLevel
+  sourceOrganization String?
+  sourceUrl          String?
+  retrievedDate     DateTime?
+  sourceType        SourceType         @default(INTERNAL_AUDIT)
+  verificationStatus VerificationStatus @default(UNVERIFIED)
+  reviewerNotes     String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  /// Alternative names / trade names for this ingredient.
+  aliases IngredientAlias[]
+
+  benefits IngredientBenefit[]
+
+  /// Detailed safety breakdown (one-to-one).
+  safetyProfile SafetyProfile?
+
+  /// Country-specific regulatory information.
+  regulations Regulation[]
+
+  /// Peer-reviewed sources backing the safety data.
+  scientificReferences ScientificReference[]
+
+  /// Appearances across all user scans.
+  scanIngredients ScanIngredient[]
+
+  @@index([inciName])
+  @@index([commonName])
+}
+
+
+/// Alternative names or trade names associated with an ingredient.
+model IngredientAlias {
+  id           String @id @default(uuid()) @db.Uuid
+  ingredientId String @db.Uuid
+  alias        String
+  sourceOrganization String?
+  sourceUrl          String?
+  retrievedDate     DateTime?
+  sourceType        SourceType         @default(INTERNAL_AUDIT)
+  verificationStatus VerificationStatus @default(UNVERIFIED)
+
+  /// The canonical ingredient this alias refers to.
+  ingredient Ingredient @relation(fields: [ingredientId], references: [id], onDelete: Cascade)
+
+  @@index([ingredientId])
+  @@index([alias])
+}
+
+/// Detailed safety breakdown for an ingredient (one-to-one).
+model SafetyProfile {
+  id               String    @id @default(uuid()) @db.Uuid
+  ingredientId     String    @unique @db.Uuid
+  riskLevel        RiskLevel
+  allergyRisk      String
+  pregnancyRisk    String
+  acneRisk         String
+  sensitiveSkinRisk String
+  explanation      String
+
+  /// The ingredient this profile describes.
+  ingredient Ingredient @relation(fields: [ingredientId], references: [id], onDelete: Cascade)
+
+  @@index([ingredientId])
+}
+
+/// Country-specific regulatory status for an ingredient.
+model Regulation {
+  id                String            @id @default(uuid()) @db.Uuid
+  ingredientId      String            @db.Uuid
+  country           String
+  jurisdiction      String?
+  regulatoryStatus  RegulatoryStatus
+  restrictionDetails String
+  source            String
+  sourceOrganization String?
+  sourceUrl          String?
+  retrievedDate     DateTime?
+  effectiveDate     DateTime?
+  sourceType        SourceType         @default(REGULATORY_LIST)
+  verificationStatus VerificationStatus @default(UNVERIFIED)
+  reviewerNotes     String?
+  sourceDocumentId  String?
+  productCategory   String?
+  concentrationLimit String?
+
+  /// The ingredient this regulation pertains to.
+  ingredient Ingredient @relation(fields: [ingredientId], references: [id], onDelete: Cascade)
+
+  @@index([ingredientId])
+  @@index([country])
+  @@index([jurisdiction])
+}
+
+/// Peer-reviewed scientific reference supporting ingredient safety data.
+model ScientificReference {
+  id              String @id @default(uuid()) @db.Uuid
+  ingredientId    String @db.Uuid
+  title           String
+  organization    String
+  publicationYear Int
+  publicationDate DateTime?
+  evidenceSummary String
+  sourceUrl       String
+  sourceOrganization String?
+  retrievedDate     DateTime?
+  sourceType        SourceType         @default(SCIENTIFIC_STUDY)
+  verificationStatus VerificationStatus @default(UNVERIFIED)
+  reviewerNotes     String?
+
+  /// The ingredient this reference supports.
+  ingredient Ingredient @relation(fields: [ingredientId], references: [id], onDelete: Cascade)
+
+  @@index([ingredientId])
+  @@index([publicationYear])
+}
+
+/// Junction table linking a Scan to a specific detected Ingredient.
+model ScanIngredient {
+  id             String @id @default(uuid()) @db.Uuid
+  scanId         String @db.Uuid
+  ingredientId   String @db.Uuid
+  detectedName   String
+  confidenceScore Float
+
+  /// The scan that detected this ingredient.
+  scan Scan @relation(fields: [scanId], references: [id], onDelete: Cascade)
+
+  /// The canonical ingredient entry.
+  ingredient Ingredient @relation(fields: [ingredientId], references: [id], onDelete: Cascade)
+
+  @@unique([scanId, ingredientId])
+  @@index([scanId])
+  @@index([ingredientId])
+}
+
+model IngredientCategory {
+  id          String @id @default(uuid()) @db.Uuid
+  name        String @unique
+  description String?
+
+  ingredients Ingredient[]
+}
+
+
+model IngredientBenefit {
+  id           String @id @default(uuid()) @db.Uuid
+
+  ingredientId String @db.Uuid
+
+  title        String
+
+  description  String
+
+  ingredient   Ingredient   @relation(fields: [ingredientId], references: [id], onDelete: Cascade)
+
+  @@index([ingredientId])
+}
+

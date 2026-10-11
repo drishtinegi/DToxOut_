@@ -1,0 +1,8 @@
+{
+  "sourceOrganization": "European Commission / Official Journal of the EU",
+  "sourceUrl": "https://ec.europa.eu/growth/tools-databases/cosing/",
+  "retrievedDate": "2026-09-01T00:00:00Z",
+  "defaultSourceType": "REGULATORY_LIST",
+  "defaultVerificationStatus": "PENDING_REVIEW",
+  "licenseNote": "Public domain regulatory database fixture data for DToxOut testing."
+}
